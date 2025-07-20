@@ -26,7 +26,12 @@ app.post('/api/signup', signupValidator, async (c) => {
 
 		// put jwt in cookie
 		setCookie(c, 'authToken', token, cookieOptions)
+
 		// send OK
+		return c.json({
+			message: 'User registered successfully',
+			user: { id: userId, email },
+		})
 	} catch (error) {}
 	// send error msg
 	return c.text('User Authenticated')
