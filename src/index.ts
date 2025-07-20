@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { dbConn } from './db/db'
 import { signupValidator } from './schemas/signup-schema'
-import { insertUser } from './db/queries'
+import { getUserByEmail, insertUser } from './db/queries'
 import { cookieOptions, generateToken } from './helpers'
 import { setCookie } from 'hono/cookie'
 
@@ -45,17 +45,51 @@ app
 			return c.json({ errors: ['Internal server error'] }, 500)
 		}
 	})
-	.post('/api/login', async (c) => {
-		// timestamp 1:25:00
+	.post('/api/login', signupValidator, async (c) => {
+		const db = dbConn()
 		// validte user input
-		// query user by email
-		// verify password match
-		// !match = return 401
-		// match = generate jwt
-		// put jwt in cookie
-		// send OK
-		// send error
-		return
+		const { email, password } = c.req.valid('json')
+
+		try {
+			// query user by email
+			const user = getUserByEmail(db, email)
+
+			if (!user) {
+				return c.json({ errors: ['Invalid credentials'] }, 401)
+			}
+
+			// verify password match
+			const passwordMatch = await Bun.password.verify(
+				password,
+				user.password_hash,
+			)
+
+			// !match = return 401
+			if (!passwordMatch) {
+				return c.json({ errors: ['Invalid credentials'] }, 401)
+			}
+
+			// match = generate jwt
+			const token = await generateToken(user.id)
+
+			// put jwt in cookie
+			setCookie(c, 'authToken', token, cookieOptions)
+
+			// send OK
+			return c.json(
+				{
+					message: 'User logged in successfully',
+					user: { id: user.id, email: email },
+				},
+				200,
+			)
+
+			// send error
+		} catch (error) {
+			// send error
+			console.error(error)
+			return c.json({ error: ['Internal Server Error'] }, 500)
+		}
 	})
 
 export default app

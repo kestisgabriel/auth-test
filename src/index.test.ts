@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach, mock } from 'bun:test'
 import app from '.'
 import { createTestDb } from './test/test-db'
 import { Database } from 'bun:sqlite'
-import { signupReq } from './test/test-helpers'
+import { loginReq, signupReq } from './test/test-helpers'
 
 let db: Database
 
@@ -28,10 +28,10 @@ describe('signup endpoint', () => {
 		expect(res.status).toBe(200)
 		expect(data).toEqual({
 			message: 'User registered successfully',
-			user: { id: expect.any(String), email: 'z@z.com' },
+			user: { id: expect.any(String), email: 'a@b.com' },
 		})
-		const cookes = res.headers.get('Set-Cookie')
-		expect(cookes).toMatch(/authToken=/)
+		const cookies = res.headers.get('Set-Cookie')
+		expect(cookies).toMatch(/authToken=/)
 	})
 
 	it('should return 409 if user already exists', async () => {
@@ -61,6 +61,54 @@ describe('signup endpoint', () => {
 				'Invalid email address',
 				'Password must be at least 8 characters',
 			],
+		})
+	})
+})
+
+describe('login endpoint', () => {
+	it('should login user', async () => {
+		// signup user
+		const req = signupReq()
+		const res = await app.fetch(req)
+
+		// login user
+		const req2 = loginReq()
+		const res2 = await app.fetch(req2)
+		const data = await res2.json()
+		expect(res.status).toBe(200)
+		expect(data).toEqual({
+			message: 'User logged in successfully',
+			user: { id: expect.any(String), email: 'a@b.com' },
+		})
+		const cookies = res2.headers.get('set-cookie')
+		expect(cookies).toMatch(/authToken=/)
+	})
+
+	it('should return 400 if missing email or password is missing', async () => {
+		const req = loginReq('', '')
+		const res = await app.fetch(req)
+		const data = await res.json()
+		expect(res.status).toBe(400)
+		console.log(data)
+		expect(data).toEqual({
+			errors: [
+				'Invalid email address',
+				'Password must be at least 8 characters',
+			],
+		})
+	})
+
+	it('should return 401 if incorrect password provided', async () => {
+		const req = signupReq()
+		await app.fetch(req)
+
+		const req2 = loginReq('a@b.com', 'wrong-password')
+		const res = await app.fetch(req2)
+
+		const data = await res.json()
+		expect(res.status).toBe(401)
+		expect(data).toEqual({
+			errors: ['Invalid credentials'],
 		})
 	})
 })
