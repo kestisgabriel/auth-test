@@ -2,7 +2,8 @@ import { Hono } from 'hono'
 import { dbConn } from './db/db'
 import { signupValidator } from './schemas/signup-schema'
 import { insertUser } from './db/queries'
-import { generateToken } from './helpers'
+import { cookieOptions, generateToken } from './helpers'
+import { setCookie } from 'hono/cookie'
 
 const app = new Hono()
 
@@ -24,6 +25,7 @@ app.post('/api/signup', signupValidator, async (c) => {
 		const token = await generateToken(userId)
 
 		// put jwt in cookie
+		setCookie(c, 'authToken', token, cookieOptions)
 		// send OK
 	} catch (error) {}
 	// send error msg

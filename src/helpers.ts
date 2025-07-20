@@ -1,4 +1,5 @@
 import { sign } from 'hono/jwt'
+import { CookieOptions } from 'hono/utils/cookie'
 
 export const generateToken = async (userId: string) => {
 	const secret = process.env.JWT_SECRET
@@ -13,3 +14,11 @@ export const generateToken = async (userId: string) => {
 	const token = await sign(payload, secret!)
 	return token
 }
+
+export const cookieOptions = {
+	httpOnly: true,
+	secure: process.env.NODE_ENV === 'production',
+	sameSite: 'strict',
+	path: '/',
+	maxAge: 3600, // 1 hr
+} as CookieOptions
