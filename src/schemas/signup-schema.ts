@@ -10,9 +10,12 @@ export const signupSchema = z.object({
 
 export const signupValidator = zValidator('json', signupSchema, (result, c) => {
 	if (!result.success) {
-		return c.json({
-			// extract nested error messages from zod
-			errors: result.error.issues.map((issue) => issue.message),
-		})
+		return c.json(
+			{
+				// extract nested error messages from zod
+				errors: result.error.issues.map((issue) => issue.message),
+			},
+			400,
+		)
 	}
 })
