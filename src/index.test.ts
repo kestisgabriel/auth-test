@@ -3,7 +3,6 @@ import app from '.'
 import { createTestDb } from './test/test-db'
 import { Database } from 'bun:sqlite'
 import { signupReq } from './test/test-helpers'
-import { sign } from 'hono/jwt'
 
 let db: Database
 

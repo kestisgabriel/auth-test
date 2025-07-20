@@ -12,37 +12,50 @@ app.get('/', (c) => {
 	return c.text('Hello Hono!')
 })
 
-app.post('/api/signup', signupValidator, async (c) => {
-	const db = dbConn()
-	// validate input
-	const { email, password } = c.req.valid('json')
+app
+	.post('/api/signup', signupValidator, async (c) => {
+		const db = dbConn()
+		// validate input
+		const { email, password } = c.req.valid('json')
 
-	// insert user into db
-	try {
-		const userId = await insertUser(db, email, password)
+		// insert user into db
+		try {
+			const userId = await insertUser(db, email, password)
 
-		// generate jwt
-		const token = await generateToken(userId)
+			// generate jwt
+			const token = await generateToken(userId)
 
-		// put jwt in cookie
-		setCookie(c, 'authToken', token, cookieOptions)
+			// put jwt in cookie
+			setCookie(c, 'authToken', token, cookieOptions)
 
-		// send OK
-		return c.json({
-			message: 'User registered successfully',
-			user: { id: userId, email },
-		})
-	} catch (error) {
-		// send error msg
-		if (
-			error instanceof Error &&
-			error.message.includes('UNIQUE constraint failed')
-		) {
-			return c.json({ errors: ['User already exists'] }, 409)
+			// send OK
+			return c.json({
+				message: 'User registered successfully',
+				user: { id: userId, email },
+			})
+		} catch (error) {
+			// send error msg
+			if (
+				error instanceof Error &&
+				error.message.includes('UNIQUE constraint failed')
+			) {
+				return c.json({ errors: ['User already exists'] }, 409)
+			}
+			console.error('Signup error:', error)
+			return c.json({ errors: ['Internal server error'] }, 500)
 		}
-		console.error('Signup error:', error)
-		return c.json({ errors: ['Internal server error'] }, 500)
-	}
-})
+	})
+	.post('/api/login', async (c) => {
+		// timestamp 1:25:00
+		// validte user input
+		// query user by email
+		// verify password match
+		// !match = return 401
+		// match = generate jwt
+		// put jwt in cookie
+		// send OK
+		// send error
+		return
+	})
 
 export default app
