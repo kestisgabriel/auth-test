@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { dbConn } from './db/db'
 import { signupValidator } from './schemas/signup-schema'
 import { insertUser } from './db/queries'
+import { generateToken } from './helpers'
 
 const app = new Hono()
 
@@ -20,6 +21,8 @@ app.post('/api/signup', signupValidator, async (c) => {
 		const userId = await insertUser(db, email, password)
 
 		// generate jwt
+		const token = await generateToken(userId)
+
 		// put jwt in cookie
 		// send OK
 	} catch (error) {}
