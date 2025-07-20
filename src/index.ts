@@ -32,9 +32,17 @@ app.post('/api/signup', signupValidator, async (c) => {
 			message: 'User registered successfully',
 			user: { id: userId, email },
 		})
-	} catch (error) {}
-	// send error msg
-	return c.text('User Authenticated')
+	} catch (error) {
+		// send error msg
+		if (
+			error instanceof Error &&
+			error.message.includes('UNIQUE constraint failed')
+		) {
+			return c.json({ errors: ['User already exists'] }, 409)
+		}
+		console.error('Signup error:', error)
+		return c.json({ errors: ['Internal server error'] }, 500)
+	}
 })
 
 export default app
