@@ -4,6 +4,8 @@ import { signupValidator } from './schemas/signup-schema'
 import { getUserByEmail, insertUser } from './db/queries'
 import { cookieOptions, generateToken } from './helpers'
 import { deleteCookie, setCookie } from 'hono/cookie'
+import { csrf } from 'hono/csrf'
+import { jwt } from 'hono/jwt'
 
 const app = new Hono()
 
@@ -13,6 +15,11 @@ app.get('/', (c) => {
 })
 
 app
+	.use('/api/*', csrf())
+	.use(
+		'/api/auth/*',
+		jwt({ secret: process.env.JWT_SECRET!, cookie: 'authToken' }),
+	)
 	.post('/api/signup', signupValidator, async (c) => {
 		const db = dbConn()
 		// validate input
