@@ -19,3 +19,10 @@ export const loginReq = (email = 'a@b.com', password = 'password') => {
 		}),
 	})
 }
+
+export const logoutReq = () => {
+	return new Request('http://localhost/api/logout', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+	})
+}
