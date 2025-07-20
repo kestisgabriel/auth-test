@@ -3,6 +3,7 @@ import app from '.'
 import { createTestDb } from './test/test-db'
 import { Database } from 'bun:sqlite'
 import { signupReq } from './test/test-helpers'
+import { sign } from 'hono/jwt'
 
 let db: Database
 
@@ -46,6 +47,21 @@ describe('signup endpoint', () => {
 		expect(res2.status).toBe(409)
 		expect(data).toEqual({
 			errors: ['User already exists'],
+		})
+	})
+
+	it('should return error if missing email or password', async () => {
+		const req = signupReq('', '')
+		const res = await app.fetch(req)
+		const data = await res.json()
+		console.log(data)
+
+		expect(res.status).toBe(400)
+		expect(data).toEqual({
+			errors: [
+				'Invalid email address',
+				'Password must be at least 8 characters',
+			],
 		})
 	})
 })
