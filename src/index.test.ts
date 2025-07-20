@@ -33,4 +33,19 @@ describe('signup endpoint', () => {
 		const cookes = res.headers.get('Set-Cookie')
 		expect(cookes).toMatch(/authToken=/)
 	})
+
+	it('should return 409 if user already exists', async () => {
+		const req = signupReq()
+		const res = await app.fetch(req)
+		expect(res.status).toBe(200)
+
+		const req2 = signupReq()
+		const res2 = await app.fetch(req2)
+		const data = await res2.json()
+
+		expect(res2.status).toBe(409)
+		expect(data).toEqual({
+			errors: ['User already exists'],
+		})
+	})
 })
