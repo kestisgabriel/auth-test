@@ -1,17 +1,19 @@
-import { Database } from 'bun:sqlite';
-import { join } from 'path';
+import { Database } from 'bun:sqlite'
+import { join } from 'path'
 
-const dbPath = join(',', 'db.sqlite');
+const dbPath = join(',', 'db.sqlite')
 
-let db: Database;
+let db: Database
 
 export const dbConn = () => {
 	if (!db) {
-		db = new Database(dbPath);
-		db.exec('PRAGMA journal_mode = WAL');
+		db = new Database(dbPath)
+		db.exec('PRAGMA journal_mode = WAL')
+
+		applySchema(db)
 	}
-	return db;
-};
+	return db
+}
 
 export const applySchema = (dbInstance: Database) => {
 	dbInstance.exec(`
@@ -20,5 +22,5 @@ export const applySchema = (dbInstance: Database) => {
             email TEXT UNIQUE NOT NULL,
             password_has TEXT NOT NULL
         );
-    `);
-};
+    `)
+}
