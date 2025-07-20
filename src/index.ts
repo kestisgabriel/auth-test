@@ -108,4 +108,15 @@ app
 
 		return c.json({ message: 'User logged out successfully' }, 200)
 	})
+	.get('/api/me', async (c) => {
+		const payload = c.get('jwtPayload')
+
+		try {
+			// fetch user by id
+			// send success with user data
+		} catch (error) {
+			// send error
+		}
+	})
+
 export default app
