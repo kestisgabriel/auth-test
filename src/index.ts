@@ -3,7 +3,7 @@ import { dbConn } from './db/db'
 import { signupValidator } from './schemas/signup-schema'
 import { getUserByEmail, insertUser } from './db/queries'
 import { cookieOptions, generateToken } from './helpers'
-import { setCookie } from 'hono/cookie'
+import { deleteCookie, setCookie } from 'hono/cookie'
 
 const app = new Hono()
 
@@ -91,5 +91,14 @@ app
 			return c.json({ error: ['Internal Server Error'] }, 500)
 		}
 	})
+	.post('/api/logout', (c) => {
+		deleteCookie(c, 'authToken', {
+			path: '/',
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict',
+			httpOnly: true,
+		})
 
+		return c.json({ message: 'User logged out successfully' }, 200)
+	})
 export default app
