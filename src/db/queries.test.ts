@@ -11,4 +11,20 @@ describe('insertUser', () => {
 		console.log(userId)
 		expect(userId).toBeDefined()
 	})
+
+	it('should throw error if email is already in db', async () => {
+		const db = createTestDb()
+		const email = 'a@b.com'
+		const password = 'password'
+		await insertUser(db, email, password)
+
+		try {
+			await insertUser(db, email, password)
+		} catch (error) {
+			console.log(error)
+			expect(error).toBeInstanceOf(Error)
+			// @ts-ignore
+			expect(error.message).toMatch(/UNIQUE constraint failed/)
+		}
+	})
 })
