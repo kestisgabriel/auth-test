@@ -1,7 +1,7 @@
 import { Database } from 'bun:sqlite'
 import { join } from 'path'
 
-const dbPath = join(',', 'db.sqlite')
+const dbPath = join('.', 'db.sqlite')
 
 let db: Database
 
@@ -20,7 +20,8 @@ export const applySchema = (dbInstance: Database) => {
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
-            password_has TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     `)
 }
