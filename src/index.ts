@@ -15,23 +15,16 @@ app.get("/", (c) => {
 })
 
 app
-  // middleware
-  .use("/api/*", csrf())
-  .use("/api/auth/*", jwt({ secret: process.env.JWT_SECRET!, cookie: "authToken" }))
-
-  // signup
+  .use("/api/*", csrf()) // hono's csrf middleware
+  .use("/api/auth/*", jwt({ secret: process.env.JWT_SECRET!, cookie: "authToken" })) // protected routes
   .post("/api/signup", signupValidator, async (c) => {
     const db = dbConn()
-    // validate input
-    const { email, password } = c.req.valid("json")
+    const { email, password } = c.req.valid("json") // validate user
 
-    // insert user into db
     try {
-      const userId = await insertUser(db, email, password)
-      // generate jwt
-      const token = await generateToken(userId)
-      // put jwt in cookie
-      setCookie(c, "authToken", token, cookieOptions)
+      const userId = await insertUser(db, email, password) // generate UUID
+      const token = await generateToken(userId) // get jwt token
+      setCookie(c, "authToken", token, cookieOptions) // add token to cookie
 
       return c.json({
         message: "User registered successfully",
@@ -41,32 +34,30 @@ app
       if (error instanceof Error && error.message.includes("UNIQUE constraint failed")) {
         return c.json({ errors: ["User already exists"] }, 409)
       }
+
       console.error("Signup error:", error)
+
       return c.json({ errors: ["Internal server error"] }, 500)
     }
   })
-
-  // login
   .post("/api/login", signupValidator, async (c) => {
     const db = dbConn()
-    // validte user input
     const { email, password } = c.req.valid("json")
 
     try {
-      // query user by email
       const user = getUserByEmail(db, email)
+
       if (!user) {
         return c.json({ errors: ["Invalid credentials"] }, 401)
       }
-      // verify password match
+
       const passwordMatch = await Bun.password.verify(password, user.password_hash)
-      // !match = return 401
+
       if (!passwordMatch) {
         return c.json({ errors: ["Invalid credentials"] }, 401)
       }
-      // match = generate jwt
+
       const token = await generateToken(user.id)
-      // put jwt in cookie
       setCookie(c, "authToken", token, cookieOptions)
 
       return c.json(
@@ -81,26 +72,24 @@ app
       return c.json({ error: ["Internal Server Error"] }, 500)
     }
   })
-
-  // logout
   .post("/api/logout", (c) => {
+    // stateless session - simply delete cookie
     deleteCookie(c, "authToken", {
-      path: "/",
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      httpOnly: true,
+      path: "/",
     })
 
     return c.json({ message: "User logged out successfully" }, 200)
   })
-
-  // get current user
   .get("/api/auth/me", async (c) => {
     const db = dbConn()
     const payload = c.get("jwtPayload")
 
     try {
       const user = getUserById(db, payload.sub)
+
       if (!user) {
         return c.json({ error: ["User not found"] }, 404)
       }
