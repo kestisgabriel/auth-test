@@ -1,6 +1,6 @@
 # Simple User Authentication
 
-This is a backend for user registration. A user can sign-up, login, log out and access protected routes.
+This is a backend for user registration. A user can sign-up, login, log out and access protected routes. Tests are included for all functionality.
 
 ## Stack
 
@@ -21,6 +21,12 @@ To run:
 
 ```sh
 bun run dev
+```
+
+To run tests:
+
+```sh
+bun test
 ```
 
 open http://localhost:3000
