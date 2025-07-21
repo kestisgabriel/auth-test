@@ -1,6 +1,6 @@
 # Simple User Authentication
 
-This is a backend for user registration. A user can sign-up, login, log out and access protected routes. Tests are included for all functionality.
+This is a backend for user registration. A user can sign-up using email+password, login, log out and access protected routes. Tests are included for all functionality.
 
 ## Stack
 
