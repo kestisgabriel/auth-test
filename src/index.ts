@@ -6,6 +6,7 @@ import { cookieOptions, generateToken } from "./helpers"
 import { deleteCookie, setCookie } from "hono/cookie"
 import { csrf } from "hono/csrf"
 import { jwt } from "hono/jwt"
+import { logger } from "hono/logger"
 
 const app = new Hono()
 
@@ -15,6 +16,7 @@ app.get("/", (c) => {
 })
 
 app
+  .use("*", logger()) // request logger
   .use("/api/*", csrf()) // hono's csrf middleware
   .use("/api/auth/*", jwt({ secret: process.env.JWT_SECRET!, cookie: "authToken" })) // protected routes
   .post("/api/signup", signupValidator, async (c) => {
